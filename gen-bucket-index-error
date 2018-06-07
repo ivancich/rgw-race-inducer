@@ -1,0 +1,30 @@
+#!/bin/sh
+
+finish() {
+    trap '' SIGINT SIGTERM
+    kill -TERM $(jobs -p)
+    exit 1
+}
+trap finish SIGINT SIGTERM
+
+if pwd | grep -q "build$" ;then
+    :
+else
+    echo run from build directory
+    exit 1
+fi
+
+while true ; do
+    rm -rf out/* dev/*
+    ../../my-new-vstart
+    ../../delete_create_script.sh
+    count=$(../../list_objects.sh | wc -l)
+    if [ $count -gt 0 ] ;then
+	break
+    fi
+    ../src/stop.sh
+done
+
+../../list_objects.sh | tee list_objects.out
+../src/stop.sh
+bell

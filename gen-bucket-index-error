@@ -7,6 +7,8 @@ finish() {
 }
 trap finish SIGINT SIGTERM
 
+scripts="../../rgw-w-race-test"
+
 if pwd | grep -q "build$" ;then
     :
 else
@@ -16,15 +18,15 @@ fi
 
 while true ; do
     rm -rf out/* dev/*
-    ../../my-new-vstart
-    ../../delete_create_script.sh
-    count=$(../../list_objects.sh | wc -l)
+    $scripts/my-new-vstart
+    $scripts/delete_create_script.sh
+    count=$($scripts/list_objects.sh | wc -l)
     if [ $count -gt 0 ] ;then
 	break
     fi
     ../src/stop.sh
 done
 
-../../list_objects.sh | tee list_objects.out
+$scripts/list_objects.sh | tee list_objects.out
 ../src/stop.sh
 bell

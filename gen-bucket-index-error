@@ -17,16 +17,33 @@ else
 fi
 
 while true ; do
+    lsof -i :40766 -P -n
+    while [ -n "$(lsof -i :40766 -P -n)" ] ; do
+	echo "MONITOR PORT OPEN"
+	lsof -i :40766 -P -n
+	../src/stop.sh
+	sleep 1
+    done
+
+    echo CLEANING
     rm -rf out/* dev/*
-    $scripts/my-new-vstart
-    $scripts/delete_create_script.sh
-    count=$($scripts/list_objects.sh | wc -l)
+
+    echo STARTING
+    ${scripts}/my-new-vstart
+
+    echo DELETING AND CREATING
+    ${scripts}/delete_create_script.sh
+
+    echo COUNTING
+    count=$(${scripts}/list_objects.sh | wc -l)
     if [ $count -gt 0 ] ;then
 	break
     fi
+
+    echo STOPPING
     ../src/stop.sh
 done
 
-$scripts/list_objects.sh | tee list_objects.out
+${scripts}/list_objects.sh | tee list_objects.out
 ../src/stop.sh
 bell
